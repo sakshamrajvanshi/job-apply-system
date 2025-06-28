@@ -2,10 +2,11 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const cron = require('node-cron');
+const path = require('path');
 
 const app = express();
 
-// ✅ Allow both frontend (Vercel) and local testing (localhost:3000)
+// ✅ Allow both frontend (Vercel) and local testing
 const allowedOrigins = [
   'http://localhost:3000',
   'https://job-apply-system123.vercel.app'
@@ -23,47 +24,66 @@ app.use(cors({
 
 app.use(express.json());
 
-const PORT = 5000;
-
-// Routes...
-
-// Don't change these
+// ✅ Root route for health check
 app.get('/', (req, res) => {
   res.send('🚀 Job Apply System backend is running!');
 });
 
+// ✅ Run bot by platform name
 app.post('/run/:platform', async (req, res) => {
-  const platform = req.params.platform;
+  const platform = req.params.platform.toLowerCase();
   try {
-    const bot = require(`./bots/${platform}Bot.js`);
-    await bot();
-    res.json({ message: `✅ ${platform} bot run successfully.` });
+    const botPath = path.join(__dirname, 'bots', `${platform}Bot.js`);
+    if (!fs.existsSync(botPath)) {
+      return res.status(404).json({ error: `Bot for ${platform} not found.` });
+    }
+
+    const runBot = require(botPath);
+    await runBot();
+    res.json({ message: `✅ ${platform} bot ran successfully.` });
   } catch (err) {
-    res.status(500).json({ error: `❌ Error running ${platform} bot: ${err.message}` });
+    console.error(`❌ Error running ${platform} bot:`, err);
+    res.status(500).json({ error: `❌ Error running ${platform} bot.` });
   }
 });
 
+// ✅ Return applied jobs
 app.get('/applied', (req, res) => {
   try {
-    const data = fs.readFileSync('./applied_jobs.json', 'utf8');
-    res.json(JSON.parse(data));
+    const filePath = path.join(__dirname, 'applied_jobs.json');
+    if (!fs.existsSync(filePath)) {
+      return res.json([]);
+    }
+
+    const data = fs.readFileSync(filePath, 'utf8');
+    const jobs = JSON.parse(data);
+    res.json(jobs);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read applied_jobs.json' });
+    console.error('❌ Failed to read applied_jobs.json:', err);
+    res.status(500).json({ error: '❌ Failed to load applied jobs.' });
   }
 });
 
-// Cron job
+// ✅ Cron job to run all bots daily at 3 AM server time
 cron.schedule('0 3 * * *', async () => {
-  console.log("⏰ Scheduled run started");
-  const bots = ['linkedin', 'naukri', 'internshala', 'indeed'];
-  for (const bot of bots) {
+  console.log("⏰ Scheduled bot run started...");
+  const platforms = ['linkedin', 'naukri', 'internshala', 'indeed'];
+  for (const platform of platforms) {
     try {
-      const run = require(`./bots/${bot}Bot.js`);
-      await run();
+      const botPath = path.join(__dirname, 'bots', `${platform}Bot.js`);
+      if (fs.existsSync(botPath)) {
+        const runBot = require(botPath);
+        await runBot();
+        console.log(`✅ ${platform} bot ran in cron job.`);
+      }
     } catch (err) {
-      console.error(`❌ Error in ${bot}Bot: ${err.message}`);
+      console.error(`❌ Error in ${platform} bot (cron):`, err.message);
     }
   }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+// ✅ Use dynamic port (for Render or local)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
