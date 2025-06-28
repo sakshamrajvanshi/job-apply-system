@@ -1,0 +1,21 @@
+{
+  "name": "Saksham Rajvanshi",
+  "email": "sakshamrajvanshi.dev@gmail.com",
+  "resume": "./resume.pdf",
+  "keywords": ["Web Developer", "React", "Frontend", "JavaScript", "MERN"],
+  "locations": ["Remote", "India"],
+  "linkedin": "https://linkedin.com/in/sakshamrajvanshi",
+  "github": "https://github.com/sakshamrajvanshi",
+  "internshala": {
+    "email": "sakshamrajvanshi.dev@gmail.com",
+    "password": "Saksham@1"
+  },
+  "linkedinLogin": {
+    "email": "sakshamrajvanshi.dev@gmail.com",
+    "password": "Saksham@1"
+  },
+  "naukri": {
+    "email": "sakshamrajvanshi.dev@gmail.com",
+    "password": "Saksham@1"
+  }
+}
