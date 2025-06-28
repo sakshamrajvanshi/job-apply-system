@@ -10,6 +10,7 @@ const BotTrigger = ({ platform }) => {
       await axios.post(`https://job-apply-system.onrender.com/run/${platform}`);
       setStatus('success');
     } catch (err) {
+      console.error(`❌ Bot run failed for ${platform}:`, err);
       setStatus('error');
     }
   };
@@ -19,13 +20,13 @@ const BotTrigger = ({ platform }) => {
       <h2 className="text-lg font-semibold capitalize">{platform}</h2>
       <button
         onClick={runBot}
-        className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded mt-2"
+        disabled={status === 'loading'}
+        className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded mt-2 disabled:opacity-50"
       >
-        Run Bot
+        {status === 'loading' ? 'Running...' : 'Run Bot'}
       </button>
-      {status === 'loading' && <p>Running...</p>}
-      {status === 'success' && <p className="text-green-600">✅ Completed</p>}
-      {status === 'error' && <p className="text-red-600">❌ Error</p>}
+      {status === 'success' && <p className="text-green-600 mt-2">✅ Completed</p>}
+      {status === 'error' && <p className="text-red-600 mt-2">❌ Error occurred</p>}
     </div>
   );
 };
