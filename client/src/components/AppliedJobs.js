@@ -6,7 +6,7 @@ const AppliedJobs = () => {
 
   useEffect(() => {
     axios
-      .get('https://your-backend-url.onrender.com/applied')
+      .get(`https://job-apply-system.onrender.com/run/${platform}`);
       .then((res) => setJobs(res.data.reverse()))
       .catch((err) => console.error('Failed to load jobs', err));
   }, []);
