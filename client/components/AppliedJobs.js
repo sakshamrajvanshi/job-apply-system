@@ -6,9 +6,9 @@ const AppliedJobs = () => {
 
   useEffect(() => {
     axios
-      .get('https://your-backend-url.onrender.com/applied')
+      .get('https://job-apply-system.onrender.com/applied')
       .then((res) => setJobs(res.data.reverse()))
-      .catch((err) => console.error('Failed to load jobs', err));
+      .catch((err) => console.error('❌ Failed to load jobs', err));
   }, []);
 
   return (
@@ -17,7 +17,12 @@ const AppliedJobs = () => {
       <ul className="space-y-2">
         {jobs.map((job, index) => (
           <li key={index} className="border p-2 rounded hover:bg-gray-100">
-            <a href={job.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 underline"
+            >
               {job.url}
             </a>
           </li>

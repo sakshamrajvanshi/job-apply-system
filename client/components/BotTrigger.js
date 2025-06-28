@@ -7,9 +7,10 @@ const BotTrigger = ({ platform }) => {
   const runBot = async () => {
     setStatus('loading');
     try {
-      await axios.post(`https://your-backend-url.onrender.com/run/${platform}`);
+      await axios.post(`https://job-apply-system.onrender.com/run/${platform}`);
       setStatus('success');
     } catch (err) {
+      console.error(`❌ Error running ${platform} bot`, err);
       setStatus('error');
     }
   };
