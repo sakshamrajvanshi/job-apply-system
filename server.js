@@ -5,16 +5,21 @@ const cron = require('node-cron');
 
 const app = express();
 
-// ✅ Allow only your Vercel frontend to access this backend
+// ✅ CORS for frontend
 app.use(cors({
-  origin: 'https://job-apply-system123.vercel.app', // your deployed frontend
+  origin: 'https://job-apply-system123.vercel.app',
 }));
 
 app.use(express.json());
 
 const PORT = 5000;
 
-// 📌 Run specific bot
+// ✅ Root welcome route
+app.get('/', (req, res) => {
+  res.send('🚀 Job Apply System backend is running!');
+});
+
+// ✅ Run specific bot
 app.post('/run/:platform', async (req, res) => {
   const platform = req.params.platform;
   try {
@@ -26,7 +31,7 @@ app.post('/run/:platform', async (req, res) => {
   }
 });
 
-// 📌 View applied jobs
+// ✅ View applied jobs
 app.get('/applied', (req, res) => {
   try {
     const data = fs.readFileSync('./applied_jobs.json', 'utf8');
@@ -36,9 +41,8 @@ app.get('/applied', (req, res) => {
   }
 });
 
-// 📅 Daily scheduled job run at 9 AM IST
+// ✅ Daily cron at 9 AM IST (~3 AM UTC)
 cron.schedule('0 3 * * *', async () => {
-  // 9 AM IST = 3:30 AM UTC, but we approximate with 3 AM UTC for now
   console.log("⏰ Scheduled run started");
   const bots = ['linkedin', 'naukri', 'internshala', 'indeed'];
   for (const bot of bots) {
