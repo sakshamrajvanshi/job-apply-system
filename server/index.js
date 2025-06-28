@@ -1,47 +1,46 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
-const cron = require('node-cron');
+const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5000;
+// ✅ Root route to fix "Cannot GET /"
+app.get("/", (req, res) => {
+  res.send("🚀 Job Apply System backend is running!");
+});
 
-// Run specific bot
-app.post('/run/:platform', async (req, res) => {
+// ✅ Endpoint to get applied jobs
+app.get("/applied", (req, res) => {
+  const filePath = path.join(__dirname, "applied_jobs.json");
+  if (!fs.existsSync(filePath)) return res.json([]);
+  const data = JSON.parse(fs.readFileSync(filePath));
+  res.json(data);
+});
+
+// ✅ Run a bot based on platform
+app.post("/run/:platform", async (req, res) => {
   const platform = req.params.platform;
+  const botPath = path.join(__dirname, "bots", `${platform}Bot.js`);
+
+  if (!fs.existsSync(botPath)) {
+    return res.status(404).json({ error: `No bot found for ${platform}` });
+  }
+
   try {
-    const bot = require(`./bots/${platform}Bot.js`);
-    await bot();
-    res.json({ message: `✅ ${platform} bot run successfully.` });
+    const runBot = require(botPath);
+    await runBot();
+    res.json({ message: `✅ ${platform} bot completed.` });
   } catch (err) {
-    res.status(500).json({ error: `❌ Error running ${platform} bot: ${err.message}` });
+    console.error(err);
+    res.status(500).json({ error: "Bot execution failed." });
   }
 });
 
-// View applied jobs
-app.get('/applied', (req, res) => {
-  try {
-    const data = fs.readFileSync('./server/applied_jobs.json', 'utf8');
-    res.json(JSON.parse(data));
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to read applied jobs.' });
-  }
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
-
-// Daily scheduled job run
-cron.schedule('0 9 * * *', async () => {
-  const bots = ['linkedin', 'naukri', 'internshala', 'indeed'];
-  for (const bot of bots) {
-    try {
-      const run = require(`./bots/${bot}Bot.js`);
-      await run();
-    } catch (err) {
-      console.error(`❌ Error in ${bot}Bot: ${err.message}`);
-    }
-  }
-});
-
-app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
