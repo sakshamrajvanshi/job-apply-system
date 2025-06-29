@@ -1,6 +1,7 @@
 import React from 'react';
 import AppliedJobs from './components/AppliedJobs';
 import BotTrigger from './components/BotTrigger';
+import './index.css';
 
 function App() {
   const platforms = ['linkedin', 'naukri', 'internshala', 'indeed'];
